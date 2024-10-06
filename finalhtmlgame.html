@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Quest: Orbital Adventure</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="800"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const WIDTH = 800;
+        const HEIGHT = 800;
+
+        const BLACK = 'black';
+        const YELLOW = 'yellow';
+        const BLUE = 'blue';
+        const RED = 'red';
+        const ORANGE = 'orange';
+        const GREEN = 'green';
+        const GREY = 'grey';
+        const WHITE = 'white';
+
+        const hazardMessages = {
+            'Mercury': ["Mercury is too hot to survive!", "Extreme solar radiation!"],
+            'Venus': ["Crushing atmospheric pressure!", "Sulfuric acid clouds!"],
+            'Earth': ["Earth is safe for exploration."],
+            'Mars': ["Toxic atmosphere!", "Dust storms!"],
+            'Jupiter': ["Violent storms!", "Massive gravitational pull!"],
+            'Saturn': ["Rings can cause damage!", "Strong winds!"],
+            'Uranus': ["Too cold for survival!", "Toxic atmosphere!"],
+            'Neptune': ["Extreme winds!", "Deadly temperatures!"]
+        };
+
+        class Cody {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.alive = true;
+            }
+            draw() {
+                if (this.alive) {
+                    ctx.fillStyle = WHITE;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = WHITE;
+                    ctx.fillText("Cody", this.x - 20, this.y - 30);
+                }
+            }
+            move(keys) {
+                if (keys['ArrowLeft']) this.x -= 5;
+                if (keys['ArrowRight']) this.x += 5;
+                if (keys['ArrowUp']) this.y -= 5;
+                if (keys['ArrowDown']) this.y += 5;
+
+                this.x = Math.max(20, Math.min(this.x, WIDTH - 20));
+                this.y = Math.max(20, Math.min(this.y, HEIGHT - 20));
+            }
+        }
+
+        class Planet {
+            constructor(name, radius, color, distance, orbitalPeriod) {
+                this.name = name;
+                this.radius = radius;
+                this.color = color;
+                this.distance = distance;
+                this.angle = 0;
+                this.orbitalPeriod = orbitalPeriod;
+                this.hazardDisplayed = false;
+                this.hazardMessage = "";
+            }
+            draw(sunX, sunY) {
+                const x = sunX + this.distance * Math.cos(this.angle);
+                const y = sunY + this.distance * Math.sin(this.angle);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(x, y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = WHITE;
+                ctx.fillText(this.name, x - this.radius, y - this.radius - 15);
+
+                if (this.hazardDisplayed) {
+                    ctx.fillStyle = 'red';
+                    ctx.fillText(this.hazardMessage, x - this.radius, y - this.radius - 30);
+                }
+            }
+            updatePosition() {
+                this.angle += (2 * Math.PI) / this.orbitalPeriod;
+            }
+            checkHazard(cody) {
+                const distance = Math.hypot(cody.x - (WIDTH / 2 + this.distance * Math.cos(this.angle)),
+                    cody.y - (HEIGHT / 2 + this.distance * Math.sin(this.angle)));
+                if (distance <= this.radius + 20 && this.name !== 'Earth') {
+                    cody.alive = false;
+                    if (!this.hazardDisplayed) {
+                        this.hazardMessage = hazardMessages[this.name][Math.floor(Math.random() * hazardMessages[this.name].length)];
+                        this.hazardDisplayed = true;
+                    }
+                }
+            }
+        }
+
+        function resetGame() {
+            cody = new Cody(WIDTH / 2, HEIGHT / 2);
+            planets = [
+                new Planet('Mercury', 5, GREY, 50, 88),
+                new Planet('Venus', 9, GREEN, 100, 270),
+                new Planet('Earth', 10, BLUE, 150, 360),
+                new Planet('Mars', 8, RED, 200, 680),
+                new Planet('Jupiter', 15, ORANGE, 300, 1200),
+                new Planet('Saturn', 14, ORANGE, 350, 1500),
+                new Planet('Uranus', 12, 'lightblue', 400, 2100),
+                new Planet('Neptune', 12, 'lightblue', 450, 2300)
+            ];
+        }
+
+        let cody;
+        let planets;
+
+        resetGame();
+
+        const keysPressed = {};
+        window.addEventListener('keydown', (e) => keysPressed[e.key] = true);
+        window.addEventListener('keyup', (e) => delete keysPressed[e.key]);
+
+        function gameLoop() {
+            ctx.fillStyle = BLACK;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            const sunX = WIDTH / 2;
+            const sunY = HEIGHT / 2;
+            ctx.fillStyle = YELLOW;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (cody.alive) {
+                cody.move(keysPressed);
+            }
+
+            planets.forEach(planet => {
+                planet.updatePosition();
+                planet.draw(sunX, sunY);
+                planet.checkHazard(cody);
+            });
+
+            cody.draw();
+
+            if (!cody.alive) {
+                ctx.fillStyle = 'red';
+                ctx.fillText("Game Over! Cody Didn't Survive!", WIDTH / 2 - 150, HEIGHT / 2);
+                ctx.fillText("Press R to Restart", WIDTH / 2 - 150, HEIGHT / 2 + 30);
+                if (keysPressed['r']) {
+                    resetGame();
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
