@@ -53,13 +53,12 @@
                 this.x = x;
                 this.y = y;
                 this.alive = true;
+                this.image = new Image();
+                this.image.src = 'astronaut.png'; // Ensure this image is in the same directory
             }
             draw() {
                 if (this.alive) {
-                    ctx.fillStyle = WHITE;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.drawImage(this.image, this.x - 20, this.y - 20, 40, 40); // Adjust size as needed
                     ctx.fillStyle = WHITE;
                     ctx.fillText("Cody", this.x - 20, this.y - 30);
                 }
