@@ -29,13 +29,13 @@
         const HEIGHT = 800;
 
         const BLACK = 'black';
+        const WHITE = 'white';
         const YELLOW = 'yellow';
-        const BLUE = 'blue';
+        const GREY = 'grey';
+        const GREEN = 'green';
         const RED = 'red';
         const ORANGE = 'orange';
-        const GREEN = 'green';
-        const GREY = 'grey';
-        const WHITE = 'white';
+        const BLUE = 'blue';
 
         const hazardMessages = {
             'Mercury': ["Mercury is too hot to survive!", "Extreme solar radiation!"],
@@ -54,23 +54,29 @@
                 this.y = y;
                 this.alive = true;
                 this.image = new Image();
-                this.image.src = 'astronaut.png.png'; // Ensure this image is in the same directory
+                this.image.src = 'astronaut.png'; // Normal astronaut image
+                this.cryingImage = new Image();
+                this.cryingImage.src = 'crying-astronaut.png'; // Crying astronaut image
             }
             draw() {
                 if (this.alive) {
-                    ctx.drawImage(this.image, this.x - 20, this.y - 20, 40, 40); // Adjust size as needed
+                    ctx.drawImage(this.image, this.x - 20, this.y - 20, 40, 40);
                     ctx.fillStyle = WHITE;
                     ctx.fillText("Cody", this.x - 20, this.y - 30);
+                } else {
+                    ctx.drawImage(this.cryingImage, this.x - 20, this.y - 20, 40, 40); // Draw crying astronaut
                 }
             }
             move(keys) {
-                if (keys['ArrowLeft']) this.x -= 5;
-                if (keys['ArrowRight']) this.x += 5;
-                if (keys['ArrowUp']) this.y -= 5;
-                if (keys['ArrowDown']) this.y += 5;
+                if (this.alive) {
+                    if (keys['ArrowLeft']) this.x -= 5;
+                    if (keys['ArrowRight']) this.x += 5;
+                    if (keys['ArrowUp']) this.y -= 5;
+                    if (keys['ArrowDown']) this.y += 5;
 
-                this.x = Math.max(20, Math.min(this.x, WIDTH - 20));
-                this.y = Math.max(20, Math.min(this.y, HEIGHT - 20));
+                    this.x = Math.max(20, Math.min(this.x, WIDTH - 20));
+                    this.y = Math.max(20, Math.min(this.y, HEIGHT - 20));
+                }
             }
         }
 
